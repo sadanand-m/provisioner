@@ -20,6 +20,9 @@ public class GithubClient {
     @Autowired
     Environment environment;
 
+    @Autowired
+    RestTemplate restTemplate;
+
     private HttpHeaders createHttpHeaders() {
         String notEncoded = environment.getProperty("github.user") + ":" + environment.getProperty("github.password");
         String encodedAuth = Base64.getEncoder().encodeToString(notEncoded.getBytes());
@@ -36,7 +39,6 @@ public class GithubClient {
     {
         Map<String, List<String>> packageMap = null;
         String theUrl = environment.getProperty("github.url");
-        RestTemplate restTemplate = new RestTemplate();
         String body = null;
         try {
             HttpHeaders headers = createHttpHeaders();

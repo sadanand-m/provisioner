@@ -1,6 +1,5 @@
-package com.demo.provisioner.factory.impl;
+package com.demo.provisioner.service;
 
-import com.demo.provisioner.factory.intraface.ProvisionExecutor;
 import com.demo.provisioner.util.SFProvisionerUtil;
 import com.demo.provisioner.vo.PackageVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,21 +10,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SnowFlakeExecutor implements ProvisionExecutor {
-
-   /* Connection sfConnection = null;
-    Statement statement = null;*/
-//
-//    @Autowired
-//    JdbcTemplate jdbcTemplate;
+public class SnowFlakeExecutor implements  ProvisionExecutor{
 
     @Autowired
-    Environment env;
+    JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-
+    Environment evn;
 
     /**
      * snowflake related provision goes here...
@@ -39,19 +30,10 @@ public class SnowFlakeExecutor implements ProvisionExecutor {
         int envid = 104;
         System.out.println("provision snowflake objets for tenant:: "+tenantId+ " for env:: "+envid);
         SFProvisionerUtil util = new SFProvisionerUtil();
-        jdbcTemplate = util.getJdbcTemplate();
         for(String cmd: commands){
             String actualCmd = SFProvisionerUtil.doParameterResolution(cmd,packageVO.getParams(),tenantId);
             System.out.println("executing cmd:: "+actualCmd);
             jdbcTemplate.execute(actualCmd);
         }
-    }
-
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
     }
 }

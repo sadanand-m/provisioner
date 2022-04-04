@@ -8,9 +8,8 @@ public class ProvisionerConstants {
     public static final String SNOWFLAKE = "snowflake";
     public static final String S3 = "s3";
     public static final String REGEX_FOR_PARAM_RESOLUTION="\\{\\{(.*?)\\}\\}";
-    public static final String SF_USER = "";
-    public static final String SF_PASSWD = "";
-    public static final String SF_JDBC_URL = "";
+    public static final String PAYLOAD_KEY_PACKAGES = "packages";
+    public static final String  PAYLOAD_KEY_PACKAGE_NAME = "packageName";
 
    /* //TODO: not needed for now
     public static final Map<String, Integer> ENVIRONMENT_ID_MAP = new HashMap<String, Integer>() {{
