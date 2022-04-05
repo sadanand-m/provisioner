@@ -43,6 +43,7 @@ public class GithubClient {
         try {
             HttpHeaders headers = createHttpHeaders();
             HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+            //TODO: exception handling in case of exchange error e.g. missing or wrong pwd
             ResponseEntity<String>
                     response = restTemplate.exchange(theUrl, HttpMethod.GET, entity, String.class,
                     environment.getProperty("github.user"),

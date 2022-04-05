@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SnowFlakeExecutor implements  ProvisionExecutor{
+public class SnowFlakeExecutor implements ProvisionExecutor{
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -27,11 +27,10 @@ public class SnowFlakeExecutor implements  ProvisionExecutor{
     @Override
     public void provision(List<String> commands, int tenantId, PackageVO packageVO) {
         //FIXME: autowiring is broken here, need to infer env value from it
-        int envid = 104;
+        String envid = this.evn.getProperty("env");
         System.out.println("provision snowflake objets for tenant:: "+tenantId+ " for env:: "+envid);
-        SFProvisionerUtil util = new SFProvisionerUtil();
-        for(String cmd: commands){
-            String actualCmd = SFProvisionerUtil.doParameterResolution(cmd,packageVO.getParams(),tenantId);
+        for(String cmd: commands) {
+            String actualCmd = SFProvisionerUtil.doParameterResolution(cmd,packageVO.getParams(),tenantId,envid);
             System.out.println("executing cmd:: "+actualCmd);
             jdbcTemplate.execute(actualCmd);
         }
