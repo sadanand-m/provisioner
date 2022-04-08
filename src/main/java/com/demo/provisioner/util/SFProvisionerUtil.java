@@ -1,14 +1,19 @@
 package com.demo.provisioner.util;
 
 import com.demo.provisioner.constants.ProvisionerConstants;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SFProvisionerUtil {
+
+    @Autowired
+    Environment environment;
 
     public static String doParameterResolution(String cmd, Map<String, String> params, int tenantId, String env) {
        // TODO remove this hardcoding
@@ -33,5 +38,9 @@ public class SFProvisionerUtil {
                 finalInput = finalInput.replaceAll(entry.getKey(),entry.getValue());
         }
         return finalInput;
+    }
+
+    public static String getTenantZeroDBName(String env, int tenantId) {
+        return MessageFormat.format("A1SF_DB_{0}_{1}", env, 0);
     }
 }
