@@ -1,5 +1,6 @@
 package com.demo.provisioner.service;
 import com.demo.provisioner.app.GithubClient;
+import com.demo.provisioner.constants.ProvisionerConstants;
 import com.demo.provisioner.util.SFProvisionerUtil;
 import com.demo.provisioner.vo.PackageVO;
 import org.apache.commons.io.FilenameUtils;
@@ -12,7 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SnowFlakeExecutor implements ProvisionExecutor {
@@ -43,31 +46,45 @@ public class SnowFlakeExecutor implements ProvisionExecutor {
         }
         //make it a flag based check for now, in-order to avoid doing it for every client
         if(!false) {
-            createTrigramTables(evn.getProperty("trigram.default.file.name"));
-            createTrigramTables(evn.getProperty("trigram.turkish.file.name"));
+            System.out.println("provisioning trigram table:: --------------start-------------");
+            provisionTrigramTables(evn.getProperty("trigram.default.file.name"));
+            provisionTrigramTables(evn.getProperty("trigram.turkish.file.name"));
+            System.out.println("provisioning trigram table:: ----------------end---------------");
         }
 
     }
 
-    private void createTrigramTables(String trigramFile1Name) {
+    private void provisionTrigramTables(String trigramFile1Name) {
         //1. read file from githbub and get the data to be inserted
         //2. create table and insert the data
         //3. set global-trigram-flag to true
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("env",evn.getProperty("env"));
+        paramMap.put("table_name",FilenameUtils.removeExtension(trigramFile1Name));
         List<Object[]> input = githubClient.getDataForTrigramTable(trigramFile1Name);
-        MessageFormat.format("A1SF_DB_{0}_{1}", evn.getProperty("env"), 0);
+      //  MessageFormat.format("A1SF_DB_{0}_{1}", evn.getProperty("env"), 0);
         String tenant0DbaseName =   SFProvisionerUtil.getTenantZeroDBName(evn.getProperty("env"),0);
-        jdbcTemplate.execute("ALTER USER A1SF_USER_104_PROVISIONER SET DEFAULT_ROLE = A1SF_ROLE_104_PROVISIONER");
-        jdbcTemplate.execute(MessageFormat.format("USE ROLE A1SF_ROLE_{0}_PROVISIONER;",evn.getProperty("env")));
-        jdbcTemplate.execute(MessageFormat.format("USE database {0}",tenant0DbaseName ));
-        System.out.println("executing cmd: "+String.format("create or replace table %s( gram  string, cnt int);",
-                                                                FilenameUtils.removeExtension(trigramFile1Name)));
-        jdbcTemplate.execute(String.format("create or replace table A1SF_DB_104_0.PUBLIC.%s( gram  string, cnt int);",FilenameUtils.removeExtension(trigramFile1Name)));
-        System.out.println(MessageFormat.format("Created Trigram tables in {0}.", tenant0DbaseName));
-        System.out.println("executing cmd: "+String.format("insert into PUBLIC.%s(gram, cnt) values(?, ?)",FilenameUtils.removeExtension(trigramFile1Name)));
-        jdbcTemplate.execute("alter user A1SF_USER_104_PROVISIONER set default_warehouse = A1SF_WH_104_temp");
-        jdbcTemplate.batchUpdate(String.format("insert into A1SF_DB_104_0.PUBLIC.%s(gram, cnt) values(?, ?)",FilenameUtils.removeExtension(trigramFile1Name)),
+        Map<String, List<String>> packageFileAsJSON = githubClient.readPackage("trigram.pkg", ProvisionerConstants.PAYLOAD_KEY_PACKAGES);
+        if(packageFileAsJSON.containsKey(ProvisionerConstants.SNOWFLAKE)) {
+            List<String> trigramCmds = packageFileAsJSON.get(ProvisionerConstants.SNOWFLAKE);
+            for (String cmd : trigramCmds) {
+                String actualCmd = SFProvisionerUtil.doParameterResolution(cmd, paramMap, ProvisionerConstants.TENANT_ZERO_ID, evn.getProperty("env"));
+                System.out.println("executing cmd:: " + actualCmd);
+                jdbcTemplate.execute(actualCmd);
+            }
+            //INSERT VALUES IN TRIGRAM TABLES IN BATCH
+            System.out.println("batch-insert into table:: "+trigramFile1Name);
+            jdbcTemplate.batchUpdate(String.format("INSERT INTO %s.PUBLIC.%s(gram, cnt) values(?, ?)",tenant0DbaseName,
+                    FilenameUtils.removeExtension(trigramFile1Name)),
                     input, 1000, this::setParameters);
-        System.out.println(MessageFormat.format("Trigram Table Provisioned {0}.", trigramFile1Name));
+        }else {
+            try {
+                throw new Exception("executor type mismatch... ");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println(MessageFormat.format("Trigram Table Provisioned:: {0}", FilenameUtils.removeExtension(trigramFile1Name)));
     }
 
     private void setParameters(PreparedStatement ps, Object[] argument) throws SQLException {

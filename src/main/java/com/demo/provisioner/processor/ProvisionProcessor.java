@@ -40,7 +40,7 @@ public class ProvisionProcessor {
             return;
         }
         //read the request package
-        Map<String, List<String>> packageFileAsJSON = githubClient.readPackage(packageFileName);
+        Map<String, List<String>> packageFileAsJSON = githubClient.readPackage(packageFileName,env.getProperty("github.package.folder"));
         processPackage(packageFileAsJSON,tenantIdList,packageVO);
     }
 
@@ -66,7 +66,7 @@ public class ProvisionProcessor {
                 snowFlakeExecutor.provision(packageFileAsJson.get(provisionType),(int)tenantId,packageVO); //env.getProperty("env"));
             else if(provisionType.equalsIgnoreCase(ProvisionerConstants.S3))
                 s3Executor.provision(packageFileAsJson.get(provisionType),(int)tenantId,packageVO); //env.getProperty("env"));
-            else    //TODO: throw custom exception here..
+            else   //TODO: throw custom exception here..
                 System.out.println("invalid provision type: no executors found for this type "+provisionType);
         }
     }

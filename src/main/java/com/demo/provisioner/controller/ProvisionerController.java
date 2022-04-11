@@ -3,6 +3,8 @@ package com.demo.provisioner.controller;
 import com.demo.provisioner.constants.ProvisionerConstants;
 import com.demo.provisioner.processor.ProvisionProcessor;
 import com.demo.provisioner.vo.PackageVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -24,9 +26,11 @@ public class ProvisionerController {
     @Autowired
     ProvisionProcessor provisionProcessor;
 
+    private static Logger LOGGER = LoggerFactory.getLogger(ProvisionerController.class);
+
     @RequestMapping("/provision")
     public String provision(@RequestBody Map<String, List<Object>> request) {
-        System.out.println("input payload:: "+request);
+        LOGGER.info("input payload:: {}",request);
         //TODO: Validator validate input-request, else throw error
         List<Object> tenantIdList = request.get("tenantid");
         PackageVO packageVO = null;
@@ -44,6 +48,7 @@ public class ProvisionerController {
         }
         //TODO: return meaningful exit codes
         System.out.println("provisioning done...");
+        LOGGER.info("provisioning done...");
         return "provisioning done...";
     }
 }

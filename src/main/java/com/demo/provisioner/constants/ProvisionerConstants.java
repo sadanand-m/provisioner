@@ -10,6 +10,7 @@ public class ProvisionerConstants {
     public static final String REGEX_FOR_PARAM_RESOLUTION="\\{\\{(.*?)\\}\\}";
     public static final String PAYLOAD_KEY_PACKAGES = "packages";
     public static final String  PAYLOAD_KEY_PACKAGE_NAME = "packageName";
+    public static final int TENANT_ZERO_ID = 0;
 
    /* //TODO: not needed for now
     public static final Map<String, Integer> ENVIRONMENT_ID_MAP = new HashMap<String, Integer>() {{
