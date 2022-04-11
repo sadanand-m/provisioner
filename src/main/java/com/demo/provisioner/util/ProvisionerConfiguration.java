@@ -1,5 +1,6 @@
 package com.demo.provisioner.util;
 
+import com.demo.provisioner.vo.TrigramVO;
 import net.snowflake.client.jdbc.SnowflakeBasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.Resource;
 
 @Configuration
 public class ProvisionerConfiguration {
@@ -18,6 +21,9 @@ public class ProvisionerConfiguration {
 
     @Autowired
     Environment env;
+
+    @Bean
+    public TrigramVO getTrigramVO(){ return new TrigramVO();};
 
     @Bean
     public JdbcTemplate getJdbcTemplate() {

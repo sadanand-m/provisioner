@@ -3,6 +3,7 @@ import com.demo.provisioner.app.GithubClient;
 import com.demo.provisioner.constants.ProvisionerConstants;
 import com.demo.provisioner.util.SFProvisionerUtil;
 import com.demo.provisioner.vo.PackageVO;
+import com.demo.provisioner.vo.TrigramVO;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -29,6 +30,9 @@ public class SnowFlakeExecutor implements ProvisionExecutor {
     @Autowired
     GithubClient githubClient;
 
+    @Autowired
+    TrigramVO trigramVO;
+
     /**
      * snowflake related provision goes here...
      * @param commands
@@ -45,13 +49,13 @@ public class SnowFlakeExecutor implements ProvisionExecutor {
             jdbcTemplate.execute(actualCmd);
         }
         //make it a flag based check for now, in-order to avoid doing it for every client
-        if(!false) {
+        if(!trigramVO.isTrigramProvisioned()) {
             System.out.println("provisioning trigram table:: --------------start-------------");
             provisionTrigramTables(evn.getProperty("trigram.default.file.name"));
             provisionTrigramTables(evn.getProperty("trigram.turkish.file.name"));
             System.out.println("provisioning trigram table:: ----------------end---------------");
+            trigramVO.setTrigramProvisioned(true);
         }
-
     }
 
     private void provisionTrigramTables(String trigramFile1Name) {

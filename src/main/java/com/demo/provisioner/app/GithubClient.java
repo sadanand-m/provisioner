@@ -70,7 +70,7 @@ public class GithubClient {
         }
         if(body==null)
         try {
-            throw new Exception("No package file found in Github location:  "+theUrl);
+            throw new Exception("No package file found in Github location:  "+theUrl+"\n check if connection credentials are valid");
         } catch (Exception e) {
             e.printStackTrace();
         }
